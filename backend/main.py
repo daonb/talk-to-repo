@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import threading
 from typing import List, Optional
-
+import re
 import openai
 import pandas as pd
 import pinecone
@@ -138,14 +138,19 @@ def format_context(docs, LOCAL_REPO_PATH):
 
     for d in docs:
         document_id = d.metadata["document_id"]
+        start_location = (str(d.metadata["start_line"]) , str(d.metadata["start_position"]))
+        end_location = (str(d.metadata["end_line"]) , str(d.metadata["end_position"]))
         if document_id in aggregated_docs:
-            aggregated_docs[document_id].append(d.page_content)
+            aggregated_docs[document_id]["content"].append(d.page_content)
+            aggregated_docs[document_id]["segments"].append((start_location , end_location))
         else:
-            aggregated_docs[document_id] = [d.page_content]
+            aggregated_docs[document_id] ={"content" : [d.page_content] , "segments" : [(start_location , end_location)]}
 
     context_parts = []
-    for i, (document_id, content_parts) in enumerate(aggregated_docs.items()):
+    for i, (document_id, data_parts) in enumerate(aggregated_docs.items()):
         # Calculate the token count of the entire file
+        content_parts = data_parts["content"]
+        context_segments = data_parts["segments"]
         entire_file_token_count = corpus_summary.loc[
             corpus_summary["file_name"] == document_id
         ]["n_tokens"].values[0]
@@ -160,17 +165,28 @@ def format_context(docs, LOCAL_REPO_PATH):
             fname = LOCAL_REPO_PATH + "/" + document_id
             with open(fname, "r") as f:
                 file_contents = f.read()
-            context_parts.append(f"[{i}] Full file {document_id}:\n" + file_contents)
+            context_parts.append(f"[{i}] Full file {document_id}:\n" + add_line_numbers(file_contents))
         else:
             # Include only the content_parts
-            context_parts.append(
-                f"[{i}] From file {document_id}:\n" + "\n---\n".join(content_parts)
-            )
+            for i in range(len(context_segments)):
+                context_parts.append(
+                    f"[{i}] this segment contains text from line {context_segments[i][0][0]} in position {context_segments[i][0][1]} " \
+                    f"to line {context_segments[i][1][0]} and position {context_segments[i][1][1]}"
+                    + f" of file {document_id}:\n {add_line_numbers(content_parts[i] , start=context_segments[i][0][0])}" + "\n---\n"
+                )
 
     context = "\n\n".join(context_parts)
 
     return context
 
+
+def repl(m):
+    repl.cnt+=1
+    return f'{repl.cnt:03d}: '
+
+def add_line_numbers(text , start=0):
+    repl.cnt=int(start) - min(1 , int(start))
+    return re.sub(r'(?m)^', repl, text)
 
 def format_query(query, context):
     return f"""Relevant context: {context}
@@ -529,7 +545,8 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
 
     # debug
     print(f"Applying diff to file: {file_path}, CWD: {LOCAL_REPO_PATH}")
-
+    print(diff)
+    print("-------")
     # call git apply with the diff, and check if it was successful
     result = subprocess.run(
         [
@@ -545,8 +562,8 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
         capture_output=True,
     )
     if not result.returncode == 0:
-        raise Exception(f"Failed to apply diff to file: {file_path}")
-
+        print(f"Error message: {result.stderr.decode('utf-8')}")
+        raise Exception(f"Failed to apply diff to file: {file_path} , return code: {result.returncode}")
 
 class CodeDiffs(BaseModel):
     diff: str

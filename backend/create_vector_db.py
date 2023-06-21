@@ -1,7 +1,9 @@
 import json
 import os
 import subprocess
+import copy
 from pathlib import Path
+from langchain.docstore.document import Document
 
 import pandas as pd
 import pinecone
@@ -78,6 +80,34 @@ def file_contains_secrets(filename):
     return len(output["results"].get(filename, [])) > 0
 
 
+def index_to_coordinates(s, index):
+    """Returns (line_number, col) of `index` in `s`."""
+    if not len(s):
+        return 1, 1
+    sp = s[:index+1].splitlines(keepends=True)
+    return len(sp), len(sp[-1])
+
+def create_documents_with_met(splitter, texts, metadatas = None):
+    """Create documents from a list of texts."""
+    _metadatas = metadatas or [{}] * len(texts)
+    documents = []
+    for i, text in enumerate(texts):
+        index = -1
+        for chunk in splitter.split_text(text):
+            metadata = copy.deepcopy(_metadatas[i])
+            #                 if self._add_start_index:
+            index = text.find(chunk, index + 1)
+            start_coordinates = index_to_coordinates(text, index)
+            end_coordinates = index_to_coordinates(text, index + len(chunk))
+            metadata["start_index"] = index
+            metadata["start_line"] = str(start_coordinates[0])
+            metadata["start_position"] = str(start_coordinates[1])
+            metadata["end_line"] = str(end_coordinates[0])
+            metadata["end_position"] = str(end_coordinates[1])
+            new_doc = Document(page_content=chunk, metadata=metadata)
+            documents.append(new_doc)
+    return documents
+
 def process_file_list(temp_dir):
     with open(".db-ignore-files.txt", "r") as f:
         unwanted_files = tuple(f.read().strip().splitlines())
@@ -114,7 +144,7 @@ def process_file_list(temp_dir):
                     file_texts.append(file_contents)
                     metadatas.append({"document_id": file_path})
 
-    split_documents = splitter.create_documents(file_texts, metadatas=metadatas)
+    split_documents = create_documents_with_met(splitter , file_texts, metadatas=metadatas)
 
     print(f"Writing {len(split_documents)} documents to Pinecone")
     vector_store.from_documents(
