@@ -43,7 +43,7 @@ app.add_middleware(
 
 vector_store = Chroma(
     embedding_function=OpenAIEmbeddings(),
-    persist_directory="db",
+    persist_directory="data",
 )
 encoder = tiktoken.get_encoding("cl100k_base")
 
@@ -201,7 +201,7 @@ def embedding_search(query, k):
     )
     docsearch = Chroma(
         # index_name="talk-to-repo",
-        persist_directory="db", embedding_function=embeddings
+        persist_directory="data", embedding_function=embeddings
     )
 
     return docsearch.similarity_search(query, k=k)
