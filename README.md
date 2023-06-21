@@ -116,12 +116,12 @@ npm run dev
 # in the backend/ directory
 cd backend 
 python -m venv .venv && source .venv/bin/activate
+# For macOS users, set this environment variable to have chromadb properly installed:
+# export HNSWLIB_NO_NATIVE=1
 python -m pip install -r requirements.txt
 ```
 
-6. Set up a Pinecone index. Give it a vector dimension of 1536 and name it `talk-to-repo`. 
-
-7. Run the backend server
+6. Run the backend server
 
 ```
 uvicorn main:app --reload

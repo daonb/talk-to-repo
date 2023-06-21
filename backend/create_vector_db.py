@@ -6,12 +6,11 @@ from pathlib import Path
 from langchain.docstore.document import Document
 
 import pandas as pd
-import pinecone
 import tiktoken
 from dotenv import load_dotenv
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Pinecone
+from langchain.vectorstores import Chroma
 
 load_dotenv()
 
@@ -21,14 +20,9 @@ embeddings = OpenAIEmbeddings(
 )
 encoder = tiktoken.get_encoding("cl100k_base")
 
-pinecone.init(
-    api_key=os.environ["PINECONE_API_KEY"], environment=os.environ["ENVIRONMENT"]
-)
-vector_store = Pinecone(
-    index=pinecone.Index(os.environ["PINECONE_INDEX"]),
-    embedding_function=embeddings.embed_query,
-    text_key="text",
-    namespace=os.environ["NAMESPACE"],
+vector_store = Chroma(
+    embedding_function=embeddings,
+    persist_directory="data",
 )
 
 splitter = RecursiveCharacterTextSplitter(
@@ -149,12 +143,10 @@ def process_file_list(temp_dir):
 
     split_documents = create_documents_with_met(splitter , file_texts, metadatas=metadatas)
 
-    print(f"Writing {len(split_documents)} documents to Pinecone")
+    print(f"Writing {len(split_documents)} documents to Chroma")
     vector_store.from_documents(
         documents=split_documents,
         embedding=embeddings,
-        index_name=os.environ["PINECONE_INDEX"],
-        namespace=os.environ["NAMESPACE"],
     )
 
     Path("data").mkdir(parents=True, exist_ok=True)

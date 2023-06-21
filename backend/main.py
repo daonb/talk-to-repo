@@ -8,7 +8,6 @@ from typing import List, Optional
 import re
 import openai
 import pandas as pd
-import pinecone
 import tiktoken
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -19,7 +18,7 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chat_models import ChatAnthropic, ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
-from langchain.vectorstores import Pinecone
+from langchain.vectorstores import Chroma
 from pydantic import BaseModel
 
 from create_vector_db import create_vector_db
@@ -41,9 +40,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-pinecone.init(
-    api_key=os.environ["PINECONE_API_KEY"],
-    environment=os.environ["ENVIRONMENT"],
+
+vector_store = Chroma(
+    embedding_function=OpenAIEmbeddings(),
+    persist_directory="db",
 )
 encoder = tiktoken.get_encoding("cl100k_base")
 
@@ -199,11 +199,9 @@ def embedding_search(query, k):
         openai_api_key=os.environ["OPENAI_API_KEY"],
         openai_organization=os.environ["OPENAI_ORG_ID"],
     )
-    docsearch = Pinecone.from_existing_index(
-        os.environ["PINECONE_INDEX"],
-        embeddings,
-        text_key="text",
-        namespace=os.environ["NAMESPACE"],
+    docsearch = Chroma(
+        # index_name="talk-to-repo",
+        persist_directory="db", embedding_function=embeddings
     )
 
     return docsearch.similarity_search(query, k=k)
@@ -488,12 +486,6 @@ def load_repo(repo_info: RepoInfo):
         return {"status": "error", "message": "Invalid hosting platform"}
 
     os.environ["GITHUB_TOKEN"] = repo_info.token
-
-    pinecone_index = os.environ["PINECONE_INDEX"]
-    namespace = os.environ["NAMESPACE"]
-
-    index = pinecone.Index(pinecone_index)
-    index.delete(delete_all=True, namespace=namespace)
 
     create_vector_db(REPO_URL, LOCAL_REPO_PATH)
 
