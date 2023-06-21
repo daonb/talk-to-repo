@@ -40,9 +40,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+embeddings = OpenAIEmbeddings(
+    openai_api_key=os.environ["OPENAI_API_KEY"],
+    openai_organization=os.environ["OPENAI_ORG_ID"],
+)
 
 vector_store = Chroma(
-    embedding_function=OpenAIEmbeddings(),
+    embedding_function=embeddings,
     persist_directory="data",
 )
 encoder = tiktoken.get_encoding("cl100k_base")
@@ -196,9 +200,9 @@ def format_query(query, context):
 
 def embedding_search(query, k):
     embeddings = OpenAIEmbeddings(
-        openai_api_key=os.environ["OPENAI_API_KEY"],
+       openai_api_key=os.environ["OPENAI_API_KEY"],
         openai_organization=os.environ["OPENAI_ORG_ID"],
-    )
+    ) 
     docsearch = Chroma(
         # index_name="talk-to-repo",
         persist_directory="data", embedding_function=embeddings
