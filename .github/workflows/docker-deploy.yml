@@ -24,11 +24,11 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set default.region us-east-1
 
-      - name: Deploy to Lightsail
+      - name: Deploy Frontend to Lightsail
         run: |
           aws lightsail create-container-service-deployment \
             --region us-east-1 \
-            --service-name talk-to-repo \
+            --service-name talk-to-repo-frontend \
             --containers '{
               "talk-to-repo-frontend": {
                 "image": "arjeo/talk-to-repo-frontend:latest",
@@ -38,7 +38,19 @@ jobs:
                 "environment": {
                   "NEXT_PUBLIC_BACKEND_URL": "${{ secrets.NEXT_PUBLIC_BACKEND_URL }}"
                 }
-              },
+              }
+            }' \
+            --public-endpoint '{
+              "containerName": "talk-to-repo-frontend",
+              "containerPort": 3000
+            }'
+
+      - name: Deploy Backend to Lightsail
+        run: |
+          aws lightsail create-container-service-deployment \
+            --region us-east-1 \
+            --service-name talk-to-repo-backend \
+            --containers '{
               "talk-to-repo-backend": {
                 "image": "arjeo/talk-to-repo-backend:latest",
                 "ports": {
@@ -63,13 +75,6 @@ jobs:
               }
             }' \
             --public-endpoint '{
-              "containerName": "talk-to-repo-frontend",
-              "containerPort": 3000,
-              "healthCheck": {
-                "healthyThreshold": 2,
-                "unhealthyThreshold": 2,
-                "intervalSeconds": 5,
-                "path": "/",
-                "timeoutSeconds": 3
-              }
+              "containerName": "talk-to-repo-backend",
+              "containerPort": 8000
             }'
