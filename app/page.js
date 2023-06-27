@@ -48,7 +48,7 @@ export default function Home() {
       };
       
     const getSystemMessage = async (userInputMessage) => {
-        const response = await fetch('http://localhost:8000/system_message', {
+        const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_URL}/system_message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export default function Home() {
 
     const handleChat = async (updatedMessages) => {
         let accumulatedText = "";
-        fetch('http://localhost:8000/chat_stream', {
+        fetch('${process.env.NEXT_PUBLIC_BACKEND_URL}/chat_stream', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
