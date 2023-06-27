@@ -124,9 +124,9 @@ splitter = RecursiveCharacterTextSplitter(chunk_size = int(os.environ["CHUNK_SIZ
 
 def embedding_search(query, k):
     global db
-    db = db.as_retriever()
-    db.search_kwargs['k'] = k
-    retriever = JustRetrieve.from_chain_type(llm = HumanInputLLM(verbose = False), chain_type = "stuff", retriever = db)
+    db_ret = db.as_retriever()
+    db_ret.search_kwargs['k'] = k
+    retriever = JustRetrieve.from_chain_type(llm = HumanInputLLM(verbose = False), chain_type = "stuff", retriever = db_ret)
     return retriever._call({'query': query})
 
 def create_vector_db(REPO_URL, LOCAL_REPO_PATH):
