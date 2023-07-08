@@ -32,7 +32,7 @@ function GitHubInput(props) {
     setLoadingStatus(null);
     
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/load_repo", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/load_repo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ hostingPlatform, username, repo, token }), 
