@@ -154,6 +154,9 @@ def get_last_commit(repo_path):
 @app.get("/health")
 def health(): return "OK"
 
+@app.get("/")
+def healthroot(): return "OK"
+
 @app.post("/system_message", response_model = ContextSystemMessage)
 def system_message(query: Message): return dict(system_message = "\n\n".join([open("query-preamble.txt", "r").read().strip(), f"Context:\n{format_context(embedding_search(query.text, k = int(os.environ['CONTEXT_NUM'])), LOCAL_REPO_PATH)}", f"Grep Context:\n{grep_more_context(query)}", f"Commit messages:\n{get_last_commits_messages(LOCAL_REPO_PATH, 5)}"]))
 
