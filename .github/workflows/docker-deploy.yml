@@ -44,7 +44,7 @@ jobs:
               "containerName": "talk-to-repo-frontend",
               "containerPort": 3000
             }'
-
+            
       - name: Deploy Backend to Lightsail
         run: |
           aws lightsail create-container-service-deployment \
@@ -63,14 +63,14 @@ jobs:
                   "PINECONE_API_KEY": "${{ secrets.PINECONE_API_KEY }}",
                   "ENVIRONMENT": "${{ secrets.ENVIRONMENT }}",
                   "PINECONE_PROJECT_ID": "${{ secrets.PINECONE_PROJECT_ID }}",
-                  "PINECONE_INDEX": "pinecone-index",
-                  "NAMESPACE": "talk-to-repo-2",
-                  "MODEL_NAME": "gpt-4",
-                  "TEMPERATURE": "1.0",
-                  "TOKEN_LIMIT": "8000",
-                  "CONTEXT_NUM": "30",
-                  "CHUNK_SIZE": "500",
-                  "CHUNK_OVERLAP": "50"
+                  "PINECONE_INDEX": "${{ secrets.PINECONE_INDEX }}",
+                  "NAMESPACE": "${{ secrets.NAMESPACE }}",
+                  "MODEL_NAME": "${{ secrets.MODEL_NAME }}",
+                  "TEMPERATURE": "${{ secrets.TEMPERATURE }}",
+                  "TOKEN_LIMIT": "${{ secrets.TOKEN_LIMIT }}",
+                  "CONTEXT_NUM": "${{ secrets.CONTEXT_NUM }}",
+                  "CHUNK_SIZE": "${{ secrets.CHUNK_SIZE }}",
+                  "CHUNK_OVERLAP": "${{ secrets.CHUNK_OVERLAP }}"
                 }
               }
             }' \
