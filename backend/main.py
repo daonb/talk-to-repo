@@ -250,6 +250,8 @@ def load_repo(repo_info: RepoInfo):
             REPO_URL = (f"https://x-token-auth:{repo_info.token}@bitbucket.org"
                         f"/{repo_info.username}/{repo_info.repo}.git")
         else: REPO_URL = (f"https://bitbucket.org/{repo_info.username}/{repo_info.repo}.git")
+    elif repo_info.hostingPlatform == "local":
+        REPO_URL = repo_info.repo
     else:
         return {"status": "error", "message": "Invalid hosting platform"}
     os.environ["GITHUB_TOKEN"] = repo_info.token

@@ -91,6 +91,7 @@ function GitHubInput(props) {
         <option value="github">GitHub</option>
         <option value="gitlab">GitLab</option>
         <option value="bitbucket">BitBucket</option>
+        <option value="local">Local</option>
       </select>
       <input
         type="text"
