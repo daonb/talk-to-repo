@@ -14,10 +14,12 @@ function GitHubInput(props) {
   const fileInput = useRef(null);
 
   useEffect(() => {
+    const storedHostingPlatform = localStorage.getItem("hostingPlatform");
     const storedUsername = localStorage.getItem("username");
     const storedRepo = localStorage.getItem("repo");
     const storedToken = localStorage.getItem("token");
   
+    if (storedHostingPlatform) setHostingPlatform(storedHostingPlatform);
     if (storedUsername) setUsername(storedUsername);
     if (storedRepo) setRepo(storedRepo);
     if (storedToken) setToken(storedToken);
@@ -44,6 +46,7 @@ function GitHubInput(props) {
       setLoading(false); // Stop loading
       setLoadingStatus(response.ok ? 'success' : 'error');
       if (response.ok) {
+        localStorage.setItem("hostingPlatform", hostingPlatform);
         localStorage.setItem("username", username);
         localStorage.setItem("repo", repo);
         localStorage.setItem("token", token);
