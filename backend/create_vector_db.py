@@ -82,7 +82,7 @@ def process_file_list(temp_dir):
                         print(f"Skipping {file_path} as it could not be decoded")
                         continue
                     file_path = file_path.replace(temp_dir, "").lstrip("/")
-                    corpus_summary.append({"file_name": file_path, "n_tokens": len(encoder.encode(file_contents))})
+                    corpus_summary.append({"file_name": file_path, "n_tokens": len(encoder.encode(file_contents, disallowed_special=()))})
                     file_texts.append(file_contents)
                     metadatas.append({"document_id": file_path})
     split_documents = create_documents_with_met(splitter, file_texts, metadatas = metadatas)
