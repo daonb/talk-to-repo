@@ -11,4 +11,5 @@ python-dotenv
 detect_secrets
 python-patch
 anthropic
+chromadb
 sentence_transformers

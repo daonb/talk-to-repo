@@ -76,13 +76,5 @@ jobs:
             }' \
             --public-endpoint '{
               "containerName": "talk-to-repo-backend",
-              "containerPort": 8000,
-              "healthCheck": {
-                "path": "/",
-                "successCodes": "200", 
-                "intervalSeconds": 90, 
-                "timeoutSeconds": 5,
-                "healthyThreshold": 3,
-                "unhealthyThreshold": 5
-                }
+              "containerPort": 8000
             }'
