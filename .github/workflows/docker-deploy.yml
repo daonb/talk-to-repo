@@ -70,7 +70,10 @@ jobs:
                   "TOKEN_LIMIT": "${{ secrets.TOKEN_LIMIT }}",
                   "CONTEXT_NUM": "${{ secrets.CONTEXT_NUM }}",
                   "CHUNK_SIZE": "${{ secrets.CHUNK_SIZE }}",
-                  "CHUNK_OVERLAP": "${{ secrets.CHUNK_OVERLAP }}"
+                  "CHUNK_OVERLAP": "${{ secrets.CHUNK_OVERLAP }}",
+                  "ANTHROPIC_API_KEY": "${{ secrets.ANTHROPIC_API_KEY }}",
+                  "USE_ANTHROPIC": "${{ secrets.USE_ANTHROPIC }}",
+                  "USE_CHROMA": "${{ secrets.USE_CHROMA }}"
                 }
               }
             }' \
