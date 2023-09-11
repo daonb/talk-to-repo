@@ -162,7 +162,10 @@ def system_message(query: Message): return dict(system_message = "\n\n".join([op
 
 def clear_local_repo_path():
     global LOCAL_REPO_PATH
-    shutil.rmtree(LOCAL_REPO_PATH)
+    try:
+        shutil.rmtree(LOCAL_REPO_PATH)
+    except:
+        pass
     LOCAL_REPO_PATH = tempfile.mkdtemp()
     with open(".talk-to-repo-cache", "w") as f:
         f.write(LOCAL_REPO_PATH)
