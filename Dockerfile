@@ -24,6 +24,7 @@ RUN npm run build
 
 # Expose the port that the frontend will run on
 EXPOSE 3000
+ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
 
 # Start the frontend server
 CMD ["npm", "start"]
